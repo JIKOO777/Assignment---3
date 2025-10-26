@@ -1,0 +1,11 @@
+graph_id,function_name,total_cost,time_us,operations_count,vertices,edges,connected,dataset_name
+1,Prim,59.0,5226.4,7,5,7,true,graph_1
+1,Kruskal,59.0,624.8,25,5,7,true,graph_1
+2,Prim,288.0,108.6,21,10,21,true,graph_2
+2,Kruskal,288.0,96.6,72,10,21,true,graph_2
+3,Prim,321.0,198.7,44,15,44,true,graph_3
+3,Kruskal,321.0,203.6,146,15,44,true,graph_3
+4,Prim,802.0,110.5,31,25,31,true,graph_4
+4,Kruskal,802.0,78.9,117,25,31,true,graph_4
+5,Prim,1035.0,102.1,47,30,47,true,graph_5
+5,Kruskal,1035.0,71.9,170,30,47,true,graph_5
