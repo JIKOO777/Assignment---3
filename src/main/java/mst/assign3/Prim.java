@@ -3,59 +3,50 @@ package mst.assign3;
 import java.util.*;
 
 public class Prim {
-
-    public static Models.RunMetrics run(Graph g, int start) {
-        var res = new Models.RunMetrics();
+    public static Models.RunMetrics run(Graph graph, int start) {
+        Models.RunMetrics res = new Models.RunMetrics();
         res.algo = "Prim";
-        res.vertices = g.n;
-        res.edges = g.edgeCount();
-        res.mstEdges = new ArrayList<>();
-
-        boolean[] used = new boolean[g.n];
-        double[] key = new double[g.n];
-        int[] parent = new int[g.n];
-        Arrays.fill(key, Double.POSITIVE_INFINITY);
-        Arrays.fill(parent, -1);
-
-        record PQItem(int v, double w) {}
-        PriorityQueue<PQItem> pq = new PriorityQueue<>(Comparator.comparingDouble(i -> i.w));
-        long comparisons = 0;
+        res.vertices = graph.n;
+        res.edges = graph.edgeCount();
 
         long t0 = System.nanoTime();
-        key[start] = 0;
-        pq.add(new PQItem(start, 0));
+
+        boolean[] visited = new boolean[graph.n];
+        List<Edge> mstEdges = new ArrayList<>();
+        double totalCost = 0.0;
+
+        PriorityQueue<Edge> pq = new PriorityQueue<>(Comparator.comparingDouble(e -> e.w));
+        visited[start] = true;
+        pq.addAll(graph.adj.get(start));
+        res.comparisons += graph.adj.get(start).size();
 
         while (!pq.isEmpty()) {
-            var cur = pq.poll();
-            int u = cur.v();
-            if (used[u]) continue;
-            used[u] = true;
+            Edge e = pq.poll();
+            int u = e.u, v = e.v;
+            if (visited[u] && visited[v]) continue;
 
-            if (parent[u] != -1) {
-                res.mstEdges.add(new Edge(parent[u], u, key[u]));
-            }
+            mstEdges.add(e);
+            totalCost += e.w;
+            int next = visited[u] ? v : u;
+            visited[next] = true;
 
-            for (Edge e : g.adj.get(u)) {
-                comparisons++;
-                if (!used[e.v] && e.w < key[e.v]) {
-                    key[e.v] = e.w;
-                    parent[e.v] = u;
-                    pq.add(new PQItem(e.v, key[e.v]));
+            for (Edge ne : graph.adj.get(next)) {
+                if (!visited[ne.v]) {
+                    pq.add(ne);
+                    res.comparisons++;
                 }
             }
         }
 
         long t1 = System.nanoTime();
-        boolean connected = true;
-        for (boolean b : used) connected &= b;
+        long dt = t1 - t0;
 
-        res.connected = connected;
-        res.mstCost = connected ? res.mstEdges.stream().mapToDouble(ed -> ed.w).sum() : Double.NaN;
-        res.timeMs = (t1 - t0) / 1_000_000;
-        res.comparisons = comparisons;
-        res.unions = 0;
-        res.finds = 0;
+        res.timeUs = dt / 1_000.0;
+        res.timeMs = dt / 1_000_000.0;
 
+        res.mstEdges = mstEdges;
+        res.mstCost = totalCost;
+        res.connected = mstEdges.size() == graph.n - 1;
         return res;
     }
 }
